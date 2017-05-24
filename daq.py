@@ -1,11 +1,8 @@
 import numpy as np
 import cv2
-import time
-from collections import deque
-import matplotlib.pyplot as plt
 import os
-import glob
 import shutil
+import time
 
 ###open feed and calculate center
 cap = cv2.VideoCapture(0)
@@ -20,16 +17,16 @@ center_x, center_y = int(cap.get(3)/2),int(cap.get(4)/2)
 labels = np.array(["wall", "mug", "cube"])
 #*******************************************#
 ###clean image data directories
-if os.path.exists("../convnet/data/train"):
-    shutil.rmtree("../convnet/data/train")
-os.mkdir("../convnet/data/train")
-if os.path.exists("../convnet/data/validation"):
-    shutil.rmtree("../convnet/data/validation")
-os.mkdir("../convnet/data/validation")
+if os.path.exists("./data/train"):
+    shutil.rmtree("./data/train")
+os.mkdir("./data/train")
+if os.path.exists("./data/validation"):
+    shutil.rmtree("./data/validation")
+os.mkdir("./data/validation")
 
 for x in np.nditer(labels):
-    os.mkdir("../convnet/data/train/" + str(x))
-    os.mkdir("../convnet/data/validation/" + str(x))
+    os.mkdir("./data/train/" + str(x))
+    os.mkdir("./data/validation/" + str(x))
 
 
 ###misc vars
@@ -105,9 +102,9 @@ while(True):
     if writeimgfiles:
 
         if writetraindata:
-            cv2.imwrite('../convnet/data/train/' + imgclass + '/' + imgclass + str(i) + '.png', frame)
+            cv2.imwrite('./data/train/' + imgclass + '/' + imgclass + str(i) + '.png', frame)
         else:
-            cv2.imwrite('../convnet/data/validation/' + imgclass + '/' + imgclass + str(i) + '.png', frame)
+            cv2.imwrite('./data/validation/' + imgclass + '/' + imgclass + str(i) + '.png', frame)
         #f2.write(str(label) + '\n')
         i = i + 1
         if i >= max_i:
@@ -120,7 +117,6 @@ while(True):
         #f1.write(str(imgarray) + '\n')
         f1.write(str(imgarray) + ',' + str(label) + '\n')
         #f2.write(str(label) + '\n')
-        #time.sleep(3)
 
 
     img = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
