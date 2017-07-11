@@ -13,19 +13,21 @@ ret ,frame = cap.read()
 center_x, center_y = int(cap.get(3)/2),int(cap.get(4)/2)
 
 #*************TRAINING LABELS***************#
-lbl = np.array(["wall", "mug", "cube"])
+lbl = np.array(["cube", "mug", "none"])
 #*******************************************#
 ###clean image data directories
-if os.path.exists("./data/train"):
-    shutil.rmtree("./data/train")
-os.mkdir("./data/train")
-if os.path.exists("./data/validation"):
-    shutil.rmtree("./data/validation")
-os.mkdir("./data/validation")
+deletedata = False
+if deletedata:
+    if os.path.exists("./data/train"):
+        shutil.rmtree("./data/train")
+    os.mkdir("./data/train")
+    if os.path.exists("./data/validation"):
+        shutil.rmtree("./data/validation")
+    os.mkdir("./data/validation")
 
-for x in np.nditer(lbl):
-    os.mkdir("./data/train/" + str(x))
-    os.mkdir("./data/validation/" + str(x))
+    for x in np.nditer(lbl):
+        os.mkdir("./data/train/" + str(x))
+        os.mkdir("./data/validation/" + str(x))
 
 ###misc vars
 writeimgfiles = False

@@ -1,20 +1,16 @@
-
-
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense, Lambda
 from keras import backend as K
 
-
 # dimensions of our images.
 img_width, img_height = 150, 150
-
 train_data_dir = 'data/train'
 validation_data_dir = 'data/validation'
 nb_train_samples = 3000
 nb_validation_samples = 600
-epochs = 5
+epochs = 3
 batch_size = 32
 
 if K.image_data_format() == 'channels_first':
@@ -22,51 +18,26 @@ if K.image_data_format() == 'channels_first':
 else:
     input_shape = (img_width, img_height, 3)
 
-
-def build_model1():
-    model = Sequential()
-    model.add(Conv2D(32, (3,3),input_shape=input_shape))
-    model.add(Conv2D(24, 5, 5, activation='relu', subsample=(2, 2)))
-    model.add(Conv2D(36, 5, 5, activation='relu', subsample=(2, 2)))
-    model.add(Conv2D(48, 5, 5, activation='relu', subsample=(2, 2)))
-    model.add(Conv2D(64, 3, 3, activation='relu'))
-    model.add(Conv2D(64, 3, 3, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Flatten())
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(50, activation='relu'))
-    model.add(Dense(10, activation='relu'))
-    model.add(Dense(1))
-    model.add(Activation('sigmoid'))
-    model.summary()
-
-    return model
-
-def build_model2():
+def build_model():
     model = Sequential()
     model.add(Conv2D(32, (3, 3), input_shape=input_shape))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-
     model.add(Conv2D(32, (3, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-
     model.add(Conv2D(64, (3, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-
     model.add(Flatten())
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(3))
     model.add(Activation('softmax'))
-
     return model
 
-
-model = build_model2()
+model = build_model()
 model.compile(loss='categorical_crossentropy',
               optimizer='rmsprop',
               metrics=['accuracy'])

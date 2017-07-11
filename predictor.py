@@ -29,7 +29,7 @@ while(True):
     elif (pred == 1):
         label = "mug"
     elif (pred == 2):
-        label = "wall"
+        label = "none"
 
     thresh = cv2.cvtColor(thresh,cv2.COLOR_GRAY2BGR)
     cv2.putText(frame, label,(5,30),cv2.FONT_HERSHEY_SIMPLEX,0.6,(0,0,255),2)
