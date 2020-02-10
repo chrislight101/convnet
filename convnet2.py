@@ -4,75 +4,76 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense, Lambda
 from keras import backend as K
 
-# dimensions of our images.
-img_width, img_height = 150, 150
-train_data_dir = 'data/train'
-validation_data_dir = 'data/validation'
-nb_train_samples = 3000
-nb_validation_samples = 600
-epochs = 3
-batch_size = 32
+class Convnet:
 
-if K.image_data_format() == 'channels_first':
-    input_shape = (3, img_width, img_height)
-else:
-    input_shape = (img_width, img_height, 3)
+    def __init__(self, img_w=150, img_h=150):
+        self.img_width = img_w
+        self.img_height = img_h
+        self.training_directory = 'data/train'
+        self.validation_directory = 'data/validation'
 
-def build_model():
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), input_shape=input_shape))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Flatten())
-    model.add(Dense(64))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(3))
-    model.add(Activation('softmax'))
-    return model
+        # data augmentation
+        self.train_datagen = ImageDataGenerator(rescale=1. / 255,
+                                                shear_range=0.2,
+                                                zoom_range=0.2,
+                                                horizontal_flip=True)
 
-model = build_model()
-model.compile(loss='categorical_crossentropy',
-              optimizer='rmsprop',
-              metrics=['accuracy'])
+        self.test_datagen = ImageDataGenerator(rescale=1. / 255)
 
-# this is the augmentation configuration we will use for training
-train_datagen = ImageDataGenerator(
-    rescale=1. / 255,
-    shear_range=0.2,
-    zoom_range=0.2,
-    horizontal_flip=True)
+        self.train_generator = self.train_datagen.flow_from_directory(self.training_directory,
+                                                                target_size=(self.img_width, self.img_height),
+                                                                batch_size=self.batch_size,
+                                                                class_mode='categorical')
 
-# this is the augmentation configuration we will use for testing:
-# only rescaling
-test_datagen = ImageDataGenerator(rescale=1. / 255)
+        self.validation_generator = self.test_datagen.flow_from_directory(self.validation_directory,
+                                                                    target_size=(self.img_width, self.img_height),
+                                                                    batch_size=self.batch_size,
+                                                                    class_mode='categorical')
+        
+        # hyperparameters
+        self.num_training_samples = 3000
+        self.num_validation_samples = 600
+        self.epochs = 3
+        self.batch_size = 32
 
-train_generator = train_datagen.flow_from_directory(
-    train_data_dir,
-    target_size=(img_width, img_height),
-    batch_size=batch_size,
-    class_mode='categorical')
+        # Convnet model
+        self.model = self.build_model()
 
-validation_generator = test_datagen.flow_from_directory(
-    validation_data_dir,
-    target_size=(img_width, img_height),
-    batch_size=batch_size,
-    class_mode='categorical')
+        self.model.compile(loss='categorical_crossentropy',
+                            optimizer='rmsprop',
+                            metrics=['accuracy'])
 
-print(validation_generator.class_indices)
-    
-model.fit_generator(
-    train_generator,
-    steps_per_epoch=nb_train_samples // batch_size,
-    epochs=epochs,
-    validation_data=validation_generator,
-    validation_steps=nb_validation_samples // batch_size)
+        
 
-model.save('model.h5')
-model.save_weights('weights.h5')
+    def build_model(self):
+        if K.image_data_format() == 'channels_first':
+            input_shape = (3, self.img_width, self.img_height)
+        else:
+            input_shape = (self.img_width, self.img_height, 3)
+        model = Sequential()
+        model.add(Conv2D(32, (3, 3), input_shape=input_shape))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Conv2D(32, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Conv2D(64, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Flatten())
+        model.add(Dense(64))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(3))
+        model.add(Activation('softmax'))
+        return model
+
+    def train_model(self):
+        self.model.fit_generator(self.train_generator,
+                                steps_per_epoch=self.num_training_samples // self.batch_size,
+                                epochs=self.epochs,
+                                validation_data=self.validation_generator,
+                                validation_steps=self.num_validation_samples // self.batch_size)
+
+        self.model.save('model.h5')
+        self.model.save_weights('weights.h5')
